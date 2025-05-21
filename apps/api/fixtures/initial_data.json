@@ -1,0 +1,66 @@
+[
+    {
+        "model": "api.StatesList",
+        "pk": 1,
+        "fields": {
+            "name": "En sucursal de origen",
+            "abbreviation": "ESO"
+        }
+    },
+    {
+        "model": "api.StatesList",
+        "pk": 2,
+        "fields": {
+            "name": "En camino a sucursal de destino",
+            "abbreviation": "ECD"
+        }
+    },
+    {
+        "model": "api.StatesList",
+        "pk": 3,
+        "fields": {
+            "name": "En sucursal de destino",
+            "abbreviation": "ESD"
+        }
+    },
+    {
+        "model": "api.StatesList",
+        "pk": 4,
+        "fields": {
+            "name": "Paquete entregado",
+            "abbreviation": "ENT"
+        }
+    },
+    {
+        "model": "api.StatesList",
+        "pk": 5,
+        "fields": {
+            "name": "Paquete perdido",
+            "abbreviation": "PER"
+        }
+    },
+    {
+        "model": "api.StatesList",
+        "pk": 6,
+        "fields": {
+            "name": "Envío cancelado",
+            "abbreviation": "CAN"
+        }
+    },
+    {
+        "model": "api.PackageTypes",
+        "pk": 1,
+        "fields": {
+            "name": "Paquetería",
+            "abbreviation": "PAQ"
+        }
+    },
+    {
+        "model": "api.PackageTypes",
+        "pk": 2,
+        "fields": {
+            "name": "Turismo",
+            "abbreviation": "TUR"
+        }
+    }
+]

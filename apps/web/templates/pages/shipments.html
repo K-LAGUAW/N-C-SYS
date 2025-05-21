@@ -1,0 +1,94 @@
+{% extends 'layout.html' %}
+
+{% load static %}
+
+{% block customCSS %}
+<link href="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.3.0/fh-4.0.1/r-3.0.4/sc-2.4.3/datatables.min.css"
+    rel="stylesheet" integrity="sha384-2Kog+xBHckFllab8GPEP0fmBUYJmdKFV6H8W6aCAO+er+nOxf6BKbg/pmKdwB/5l"
+    crossorigin="anonymous">
+<link rel="stylesheet" href="{% static 'css/shipments.css' %}">
+{% endblock %}
+
+{% block customJS %}
+<script src="https://cdn.datatables.net/v/bs5/jq-3.7.0/dt-2.3.0/fh-4.0.1/r-3.0.4/sc-2.4.3/datatables.min.js"
+    integrity="sha384-HNFSeuNc7s2HGzGjNFV/i0XipmC7zJwvuovdipYIHXhmXWV2bBAj7AQ3A03h5wiI"
+    crossorigin="anonymous"></script>
+<script src="{% static 'js/shipments.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    {% include 'components/navbar.html' %}
+    <div class="container">
+        <table class="table table-bordered" id="shipmentsTable">
+            <thead>
+                <tr>
+                    <th><i class="ti ti-info-circle-filled fs-3"></i></th>
+                    <th scope="col">Número de envío</th>
+                    <th scope="col">Remitente</th>
+                    <th scope="col">Destinatario</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <button type="button" class="btn btn-success position-fixed bottom-0 end-0 m-4" id="addButton">
+        <i class="ti ti-device-ipad-plus fs-5"></i>
+    </button>
+
+    <div class="modal" tabindex="-1" id="configModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Configuración de impresora</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <select class="form-select" id="printerSelector"></select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="configButton">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" tabindex="-1" id="addModal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Nuevo envió</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="shipmentForm" class="d-flex flex-column gap-3">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="senderInput" placeholder="@" name="sender">
+                            <label for="senderInput">Remitente</label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="recipientInput" placeholder="@" name="recipient">
+                            <label for="recipientInput">Destinatario</label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="number" class="form-control" id="phoneInput" placeholder="@" name="phone">
+                            <label for="phoneInput">Numero de celular</label>
+                        </div>
+                        <select class="form-select p-3" id="packageAmountSelect"></select>
+                        <div class="form-floating">
+                            <input type="number" class="form-control" id="envelopeAmountInput" placeholder="@" name="envelope_amount">
+                            <label for="envelopeAmountInput">Importe de sobres</label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="number" class="form-control" id="packagePickupsInput" placeholder="@" name="package_pickups">
+                            <label for="packagePickupsInput">Cantidad de retiros</label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="addForm">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
