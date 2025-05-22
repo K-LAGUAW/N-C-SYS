@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Shipments, PackageTypes, PaymentsTypes, PackagePrices, StatesList
+from .models import Shipments, Parameters, PackageTypes, PaymentsTypes, PackagePrices, StatesList
 
 @admin.register(PackageTypes)
 class PackageTypesAdmin(admin.ModelAdmin):
@@ -17,6 +17,10 @@ class PaymentsTypesAdmin(admin.ModelAdmin):
 class StatusListAdmin(admin.ModelAdmin):
     pass
 
+@admin.register(Parameters)
+class ParametersAdmin(admin.ModelAdmin):
+    pass
+
 @admin.register(Shipments)
-class Shipments(admin.ModelAdmin):
+class ShipmentsAdmin(admin.ModelAdmin):
     readonly_fields = ('qr_code', 'total_amount', 'tracking_number', 'creation_date', 'update_date', 'payment_type', 'status')

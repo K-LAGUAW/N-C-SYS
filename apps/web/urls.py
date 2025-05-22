@@ -1,6 +1,7 @@
 from django.urls import path
-from . import views
+from .views import shipments, tracking
 
 urlpatterns = [
-    path('shipment/', views.create_shipment, name='shipment'),
+    path('shipments/', shipments, name='shipments'),
+    path('tracking/', tracking, name='tracking'),
 ]

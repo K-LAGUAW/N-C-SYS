@@ -1,4 +1,7 @@
 from django.shortcuts import render
 
-def create_shipment(request):
+def shipments(request):
     return render(request, 'pages/shipments.html')
+
+def tracking(request):
+    return render(request, 'pages/tracking.html')
