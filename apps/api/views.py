@@ -21,8 +21,8 @@ class CreateShipmentView(CreateAPIView):
     serializer_class = ShipmentCreateSerializer
 
     def perform_create(self, serializer):
-        envelope_amount = serializer.validated_data.get('envelope_amount', 0) or 0
-        package_pickup = serializer.validated_data.get('package_pickup', False)
+        envelope_amount = serializer.validated_data.get('envelope_amount')
+        package_pickup = serializer.validated_data.get('package_pickup')
         package_amount = serializer.validated_data.get('package_amount')
 
         total = 0

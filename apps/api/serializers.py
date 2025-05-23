@@ -4,10 +4,18 @@ from . models import Shipments, PackagePrices, PackageTypes
 class ShipmentSerializer(serializers.ModelSerializer):
     creation_date = serializers.DateTimeField(format="%d-%m-%Y %H:%M")
     update_date = serializers.DateTimeField(format="%d-%m-%Y %H:%M")
+    status = serializers.SerializerMethodField()
 
     class Meta:
         model = Shipments
         fields = '__all__'
+
+    def get_status(self, obj):
+        return {
+            'id': obj.status.id,
+            'name': obj.status.name,
+            'abbreviation': obj.status.abbreviation
+        }
 
 class ShipmentCreateSerializer(serializers.ModelSerializer):
     creation_date = serializers.DateTimeField(format="%d-%m-%Y %H:%M", read_only=True)
