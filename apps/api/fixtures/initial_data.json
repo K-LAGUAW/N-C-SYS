@@ -51,7 +51,7 @@
         "model": "api.PackageTypes",
         "pk": 1,
         "fields": {
-            "name": "Paquetería",
+            "name": "Paqueteria",
             "abbreviation": "PAQ"
         }
     },
@@ -124,6 +124,24 @@
             "name": "Grande Pesado/Fragil",
             "mount": 20000,
             "abbreviation": "GRP"
+        }
+    },
+    {
+        "model": "api.Parameters",
+        "pk": 1,
+        "fields": {
+            "name": "whatsapp_url",
+            "value": "",
+            "description": "URL de la API para enviar mensajes por whatsapp."
+        }
+    },
+    {
+        "model": "api.Parameters",
+        "pk": 2,
+        "fields": {
+            "name": "message_template",
+            "value": "",
+            "description": "Plantilla de mensaje de whatsapp al crear un envio nuevo."
         }
     }
 ]

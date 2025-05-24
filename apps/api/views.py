@@ -13,7 +13,7 @@ from rest_framework.generics import CreateAPIView, ListAPIView
 from django.shortcuts import get_object_or_404
 
 class ShipmentsView(ListAPIView):
-    queryset = Shipments.objects.all()
+    queryset = Shipments.objects.all().order_by('-creation_date')
     serializer_class = ShipmentSerializer
 
 class CreateShipmentView(CreateAPIView):
@@ -28,7 +28,7 @@ class CreateShipmentView(CreateAPIView):
         total = 0
         
         if envelope_amount:
-            total += envelope_amount * 0.1
+            total += envelope_amount * 0.01
         
         if package_pickup:
             total += 2500
@@ -39,20 +39,24 @@ class CreateShipmentView(CreateAPIView):
         package_type = serializer.validated_data.get('package_type')
         tracking_number = f"{package_type.abbreviation}-{str(uuid.uuid4())[:8].upper()}"
 
-        whatsapp_url = Parameters.objects.get(name="whatsapp_url").value
-        message_template = Parameters.objects.get(name="message_template").value
         whatsapp_number = serializer.validated_data.get('phone')
+        whatsapp_url = Parameters.objects.get(name="whatsapp_url").value
         
-        message = message_template.format(tracking_number=tracking_number)
-        payload = {
-            "chatId": f"549{whatsapp_number}@c.us",
-            "message": message
-        }
-        headers = {
-            'Content-Type': 'application/json'
-        }
+        if package_type.abbreviation == 'TUR':
+            message = Parameters.objects.get(name="message_tur").value.format(tracking_number=tracking_number)
+        elif package_type.abbreviation == 'PAQ':
+            message = Parameters.objects.get(name="message_paq").value.format(tracking_number=tracking_number)
+            
+        if package_type.abbreviation in ['TUR', 'PAQ']:
+            payload = {
+                "chatId": f"549{whatsapp_number}@c.us",
+                "message": message
+            }
+            headers = {
+                'Content-Type': 'application/json'
+            }
 
-        requests.post(whatsapp_url, json=payload, headers=headers)
+            requests.post(whatsapp_url, json=payload, headers=headers)
 
         qr = qrcode.QRCode(
             version=1,

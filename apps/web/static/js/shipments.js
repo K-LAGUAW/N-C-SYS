@@ -1,14 +1,21 @@
 const reloadButton = document.getElementById('reloadButton');
 const showShipment = document.getElementById('showShipment');
 
-const packageType = document.getElementById('packageType');
-const packagePrice = document.getElementById('packagePrice');
-const packagePickup = document.getElementById('packagePickup');
+const typeSelect = document.getElementById('typeSelect');
+const priceSelect = document.getElementById('priceSelect');
 
-const shipmentForm = document.getElementById('shipmentForm');
-const saveShipment = document.getElementById('saveShipment');
+const packageContainer = document.getElementById('packageContainer');
+const packageCheckbox = document.getElementById('packageCheckbox');
+
+const senderContainer = document.getElementById('senderContainer');
+const senderInput = document.getElementById('senderInput');
+
+const envelopeContainer = document.getElementById('envelopeContainer');
+const envelopeInput = document.getElementById('envelopeInput');
 
 const shipmentModal = new bootstrap.Modal(document.getElementById('shipmentModal'));
+const shipmentForm = document.getElementById('shipmentForm');
+const shipmentButton = document.getElementById('shipmentButton');
 
 let table;
 
@@ -29,6 +36,10 @@ function showNotification(type, title, message, time = 3000) {
         text: message
     });
 };
+
+async function printQR(data) {
+
+}
 
 function showDetails(data) {
     return (
@@ -123,15 +134,15 @@ showShipment.addEventListener('click', async () => {
             throw new Error();
         }
 
-        packageType.innerHTML = '';
-        packagePrice.innerHTML = '';
+        typeSelect.innerHTML = '';
+        priceSelect.innerHTML = '';
 
         data.package_types.forEach(type => {
-            packageType.innerHTML += `<option value="${type.id}">${type.name}</option>`;
+            typeSelect.innerHTML += `<option value="${type.id}">${type.name}</option>`;
         });
 
         data.package_prices.forEach(price => {
-            packagePrice.innerHTML += `<option value="${price.id}">${price.name} - $${price.mount}</option>`;
+            priceSelect.innerHTML += `<option value="${price.id}">${price.name} - $${price.mount}</option>`;
         });
 
         shipmentModal.show();
@@ -140,18 +151,20 @@ showShipment.addEventListener('click', async () => {
     }
 });
 
-saveShipment.addEventListener('click', async () => {
+shipmentButton.addEventListener('click', async () => {
     const formData = new FormData(shipmentForm);
 
+    const sender = formData.get('sender');
     const envelopeAmount = formData.get('envelope_amount');
-    formData.set('envelope_amount', envelopeAmount === '' ? 0 : envelopeAmount);
 
-    formData.append('package_type', packageType.value);
-    formData.append('package_amount', packagePrice.value);
-    formData.append('package_pickup', packagePickup.checked);
+    formData.set('sender', !sender || sender === '' ? 'N&C' : sender);
+    formData.set('envelope_amount', !envelopeAmount || envelopeAmount === '' ? 0 : envelopeAmount);
+
+    formData.append('package_type', typeSelect.value);
+    formData.append('package_amount', priceSelect.value);
+    formData.append('package_pickup', packageCheckbox.checked);
 
     const formDataObject = Object.fromEntries(formData);
-    console.log(formDataObject);
 
     try {
         const response = await fetch('/api/v1/create_shipment/', {
@@ -168,20 +181,55 @@ saveShipment.addEventListener('click', async () => {
             return;
         }
 
-        console.log(data);
-
-        shipmentModal.hide();
         if (table) {
             table.ajax.reload();
         }
+        
         showNotification('success', 'Envio creado correctamente');
+        shipmentModal.hide();
     } catch (error) {
         showNotification('error', 'Error al contactar con el servidor');
     }
 });
 
-reloadButton.addEventListener('click', function () {
-    if (table) {
-        table.ajax.reload();
+typeSelect.addEventListener('change', function() {
+    if (this.options[this.selectedIndex].text.toLowerCase() === 'turismo') {
+        senderInput.disabled = true;
+        senderInput.value = '';
+        senderContainer.classList.add('d-none');
+        
+        envelopeInput.disabled = true;
+        envelopeInput.value = '';
+        envelopeContainer.classList.add('d-none');
+        
+        packageCheckbox.disabled = true;
+        packageCheckbox.checked = false;
+        packageContainer.classList.add('d-none');
+    } else {
+        senderInput.disabled = false;
+        senderContainer.classList.remove('d-none');
+        
+        envelopeInput.disabled = false;
+        envelopeContainer.classList.remove('d-none');
+        
+        packageCheckbox.disabled = false;
+        packageContainer.classList.remove('d-none');
     }
-})
+});
+
+shipmentModal._element.addEventListener('hidden.bs.modal', function () {
+    shipmentForm.reset();
+    
+    senderInput.disabled = false;
+    senderContainer.classList.remove('d-none');
+    
+    envelopeInput.disabled = false;
+    envelopeContainer.classList.remove('d-none');
+    
+    packageCheckbox.disabled = false;
+    packageCheckbox.checked = false;
+    packageContainer.classList.remove('d-none');
+    
+    typeSelect.innerHTML = '';
+    priceSelect.innerHTML = '';
+});

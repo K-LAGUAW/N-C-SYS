@@ -47,38 +47,38 @@
                 </div>
                 <div class="modal-body">
                     <form id="shipmentForm" class="d-flex flex-column gap-3">
-                        <div class="form-floating">
-                            <input type="text" class="form-control shadow-none" placeholder="@" name="sender">
+                        <div class="form-floating" id="senderContainer">
+                            <input type="text" class="form-control shadow-none" placeholder="@" name="sender" id="senderInput">
                             <label for="senderInput">Remitente</label>
                         </div>
                         <div class="form-floating">
-                            <input type="text" class="form-control shadow-none" placeholder="@" name="recipient">
+                            <input type="text" class="form-control shadow-none" placeholder="@" name="recipient" id="recipientInput">
                             <label for="recipientInput">Destinatario</label>
                         </div>
                         <div class="form-floating">
-                            <input type="number" class="form-control shadow-none" placeholder="@" name="phone">
+                            <input type="number" class="form-control shadow-none" placeholder="@" name="phone" id="phoneInput">
                             <label for="phoneInput">Numero de celular</label>
                         </div>
                         <div class="d-flex flex-column flex-md-row gap-3">
                             <div class="flex-fill">
-                                <select class="form-select py-3 shadow-none" id="packageType"></select>
+                                <select class="form-select py-3 shadow-none" id="typeSelect"></select>
                             </div>
                             <div class="flex-fill">
-                                <select class="form-select py-3 shadow-none" id="packagePrice"></select>
+                                <select class="form-select py-3 shadow-none" id="priceSelect"></select>
                             </div>
                         </div>
-                        <div class="form-floating">
-                            <input type="number" class="form-control shadow-none" placeholder="@" name="envelope_amount">
-                            <label for="envelopeAmountInput">Importe de sobres</label>
+                        <div class="form-floating" id="envelopeContainer">
+                            <input type="number" class="form-control shadow-none" placeholder="@" name="envelope_amount" id="envelopeInput">
+                            <label for="envelopeInput">Importe de sobres</label>
                         </div>
-                        <div class="form-check form-switch py-2">
-                            <input class="form-check-input shadow-none" type="checkbox" role="switch" id="packagePickup">
-                            <label class="form-check-label fw-semibold" for="packagePickup">Se retiro el paquete</label>
+                        <div class="form-check form-switch py-2" id="packageContainer">
+                            <input class="form-check-input shadow-none" type="checkbox" role="switch" id="packageCheckbox">
+                            <label class="form-check-label fw-semibold" for="packageCheckbox">Se retiro el paquete</label>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-success" id="saveShipment">Confirmar</button>
+                    <button type="button" class="btn btn-success" id="shipmentButton">Confirmar</button>
                 </div>
             </div>
         </div>
