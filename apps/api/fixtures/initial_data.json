@@ -67,6 +67,15 @@
         "model": "api.PackagePrices",
         "pk": 1,
         "fields": {
+            "name": "Sobre",
+            "mount": 0,
+            "abbreviation": "SOB"
+        }
+    },
+    {
+        "model": "api.PackagePrices",
+        "pk": 2,
+        "fields": {
             "name": "Chico",
             "mount": 6000,
             "abbreviation": "CHI"
@@ -74,7 +83,7 @@
     },
     {
         "model": "api.PackagePrices",
-        "pk": 2,
+        "pk": 3,
         "fields": {
             "name": "Mediano",
             "mount": 8000,
@@ -83,7 +92,7 @@
     },
     {
         "model": "api.PackagePrices",
-        "pk": 3,
+        "pk": 4,
         "fields": {
             "name": "Normal",
             "mount": 10000,
@@ -92,7 +101,7 @@
     },
     {
         "model": "api.PackagePrices",
-        "pk": 4,
+        "pk": 5,
         "fields": {
             "name": "Semi Grande",
             "mount": 12000,
@@ -101,7 +110,7 @@
     },
     {
         "model": "api.PackagePrices",
-        "pk": 5,
+        "pk": 6,
         "fields": {
             "name": "Grande Normal",
             "mount": 15000,
@@ -110,7 +119,7 @@
     },
     {
         "model": "api.PackagePrices",
-        "pk": 6,
+        "pk": 7,
         "fields": {
             "name": "Grande",
             "mount": 18000,
@@ -119,7 +128,7 @@
     },
     {
         "model": "api.PackagePrices",
-        "pk": 7,
+        "pk": 8,
         "fields": {
             "name": "Grande Pesado/Fragil",
             "mount": 20000,
@@ -139,9 +148,18 @@
         "model": "api.Parameters",
         "pk": 2,
         "fields": {
-            "name": "message_template",
+            "name": "message_paq",
             "value": "",
-            "description": "Plantilla de mensaje de whatsapp al crear un envio nuevo."
+            "description": "Plantilla de mensaje de whatsapp para bulto de paqueteria."
+        }
+    },
+    {
+        "model": "api.Parameters",
+        "pk": 3,
+        "fields": {
+            "name": "message_tur",
+            "value": "",
+            "description": "Plantilla de mensaje de whatsapp para bulto de turismo."
         }
     }
 ]

@@ -30,11 +30,14 @@
     </div>
 
     <div class="d-flex flex-column gap-2 position-fixed bottom-0 end-0 m-4">
-        <button type="button" class="btn btn-success" id="showShipment">
-            <i class="ti ti-device-ipad-plus fs-5"></i>
+        <button type="button" class="btn btn-primary d-flex justify-content-center align-items-center py-2" id="showConfig">
+            <i class="ti ti-settings fs-5"></i>
         </button>
-        <button type="button" class="btn btn-success" id="reloadButton">
-            <i class="ti ti-reload"></i>
+        <button type="button" class="btn btn-warning d-flex justify-content-center align-items-center py-2" id="scanQr">
+            <i class="ti ti-qrcode fs-5"></i>
+        </button>
+        <button type="button" class="btn btn-success d-flex justify-content-center align-items-center py-2" id="showShipment">
+            <i class="ti ti-device-ipad-plus fs-5"></i>
         </button>
     </div>
 
@@ -81,6 +84,37 @@
                     <button type="button" class="btn btn-success" id="shipmentButton">Confirmar</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="modal" tabindex="-1" id="qrModal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Escanear QR</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <div id="qr-reader"></div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+    <div class="modal" tabindex="-1" id="configModal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Configuracion de impresora</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <select class="form-select py-3 shadow-none" id="printerSelect"></select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="printerButton">Guardar</button>
+            </div>
+          </div>
         </div>
     </div>
 {% endblock %}

@@ -1,76 +1,81 @@
-const reloadButton = document.getElementById('reloadButton');
+// ============= Elementos del DOM =============
+// Botones principales
+const showConfig = document.getElementById('showConfig');
+const scanQr = document.getElementById('scanQr');
 const showShipment = document.getElementById('showShipment');
 
+// Elementos del formulario
 const typeSelect = document.getElementById('typeSelect');
 const priceSelect = document.getElementById('priceSelect');
 
+// Elementos del paquete
 const packageContainer = document.getElementById('packageContainer');
 const packageCheckbox = document.getElementById('packageCheckbox');
 
+// Elementos del remitente
 const senderContainer = document.getElementById('senderContainer');
 const senderInput = document.getElementById('senderInput');
 
+// Elementos del sobre
 const envelopeContainer = document.getElementById('envelopeContainer');
 const envelopeInput = document.getElementById('envelopeInput');
 
+// Elementos del modal shipment
 const shipmentModal = new bootstrap.Modal(document.getElementById('shipmentModal'));
 const shipmentForm = document.getElementById('shipmentForm');
 const shipmentButton = document.getElementById('shipmentButton');
 
+// Elementos del modal qr
+const qrModal = new bootstrap.Modal(document.getElementById('qrModal'));
+
+// Elementos del modal config
+const configModal = new bootstrap.Modal(document.getElementById('configModal'));
+const printerSelect = document.getElementById('printerSelect');
+const printerButton = document.getElementById('printerButton');
+
+// Variables globales
 let table;
+let notificationQueue = Promise.resolve();
+let html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: {width: 250, height: 250} });
 
-document.addEventListener('DOMContentLoaded', function () {
-    initializeTable();
-});
+// ============= Utilidades =============
+function getCookie(cookieName) {
+    const name = cookieName + '=';
+    const decodedCookie = decodeURIComponent(document.cookie);
+    const cookieArray = decodedCookie.split(';');
 
-function showNotification(type, title, message, time = 3000) {
-    Swal.mixin({
-        toast: true,
-        position: "top-end",
-        showConfirmButton: false,
-        timer: time,
-        timerProgressBar: true
-    }).fire({
-        icon: type,
-        title: title,
-        text: message
-    });
-};
-
-async function printQR(data) {
-
+    for (let cookie of cookieArray) {
+        cookie = cookie.trim();
+        if (cookie.indexOf(name) === 0) {
+            return cookie.substring(name.length, cookie.length);
+        }
+    }
+    return null;
 }
 
-function showDetails(data) {
-    return (
-        `
-        <div class="d-flex flex-column my-2">
-            <div class="text-center mb-3">
-                <h2 class="text-decoration-underline link-offset-1 fs-4">Detalles del envio</h2>
-            </div>
-            <div class="d-flex flex-column flex-lg-row align-items-center justify-content-center justify-content-md-around">
-                <div class="shipment-details text-center">
-                    <p><strong>Fecha de envio:</strong> ${data.creation_date}</p>
-                    <p><strong>Numero de seguimiento:</strong> ${data.tracking_number}</p>
-                    <p><strong>Remitente:</strong> ${data.sender}</p>
-                    <p><strong>Destinatario:</strong> ${data.recipient}</p>
-                </div>
-                <div class="shipment-status text-center">
-                    <p><strong>Fecha de actualizacion:</strong> ${data.update_date}</p>
-                    <p><strong>Estado:</strong> ${data.status.name}</p>
-                    <p class="text-decoration-underline link-offset-1 fs-4 m-1">Total</p>
-                    <p class="fs-4 bg-success rounded-pill d-inline-block px-3 text-white">$ ${data.total_amount}</p>
-                </div>
-            </div>
-            <div class="d-flex flex-wrap justify-content-center align-items-center gap-2">
-                <button class="btn btn-warning fw-medium">Reimprimir ticket</button>
-                <button class="btn btn-success fw-medium">Confirmar entrega</button>
-            </div>
-        </div>
-        `
-    );
-};
+function showNotification(type, title, message, time = 3000) {
+    notificationQueue = notificationQueue.then(() => {
+        return new Promise((resolve) => {
+            Swal.mixin({
+                toast: true,
+                position: "top-end",
+                showConfirmButton: false,
+                timer: time,
+                timerProgressBar: true,
+                didClose: () => {
+                    resolve();
+                }
+            }).fire({
+                icon: type,
+                title: title,
+                text: message
+            });
+        });
+    });
+    return notificationQueue;
+}
 
+// ============= Funciones de la Tabla =============
 function initializeTable() {
     if (table) {
         table.destroy();
@@ -108,14 +113,14 @@ function initializeTable() {
         paging: false,
         info: false,
         language: {
-            url: '/static/json/es-ES.json'
+            url: '/static/json/es.json'
         }
     });
 
     table.on('click', 'td.dt-control', (e) => {
         let tr = e.target.closest('tr');
         let row = table.row(tr);
-     
+
         if (row.child.isShown()) {
             row.child.hide();
         }
@@ -123,8 +128,136 @@ function initializeTable() {
             row.child(showDetails(row.data())).show();
         }
     });
-};
+}
 
+function showDetails(data) {
+    return (
+        `
+        <div class="d-flex flex-column my-2">
+            <div class="text-center mb-3">
+                <h2 class="text-decoration-underline link-offset-1 fs-4">Detalles del envio</h2>
+            </div>
+            <div class="d-flex flex-column flex-lg-row align-items-center justify-content-center justify-content-md-around">
+                <div class="shipment-details text-center">
+                    <p><strong>Fecha de envio:</strong> ${data.creation_date}</p>
+                    <p><strong>Numero de seguimiento:</strong> ${data.tracking_number}</p>
+                    <p><strong>Remitente:</strong> ${data.sender}</p>
+                    <p><strong>Destinatario:</strong> ${data.recipient}</p>
+                </div>
+                <div class="shipment-status text-center">
+                    <p><strong>Fecha de actualizacion:</strong> ${data.update_date}</p>
+                    <p><strong>Estado:</strong> ${data.status.name}</p>
+                    <p class="text-decoration-underline link-offset-1 fs-4 m-1">Total</p>
+                    <p class="fs-4 bg-success rounded-pill d-inline-block px-3 text-white">$ ${data.total_amount}</p>
+                </div>
+            </div>
+            <div class="d-flex flex-wrap justify-content-center align-items-center gap-2">
+                <button class="btn btn-warning fw-medium">Reimprimir ticket</button>
+                ${data.status.id > 3 ? `<button class="btn btn-success fw-medium">Confirmar entrega</button>` : ''}
+            </div>
+        </div>
+        `
+    );
+}
+
+// ============= Funciones de Impresión =============
+async function printQR(data) {
+    console.log(data);
+
+    const payload = {
+        nombreImpresora: getCookie('selectedPrinter'),
+        serial: "YTAwODkxYjhfXzIwMjUtMDUtMTVfXzIwMjUtMDYtMTQjIyNZWkJRNTVZdko3bGJncWVJRXpUNCtxa0VTc1Y0Y1lhbXdhZVJscUI2OVNqME5tOVBNaVppcFdHRjVVVVNKTmQ2OXVoMTZzbHIxY05GMzBDRFVTUnRabC9BRUxqMTdOclNhSngxVjI1bzh2akE3bWRrc3FKdlhTRXB6blZ1NW1xVmN2WWJGZDRFSU1ZSXc1djQ0MU9OU3ROYURtbnMxQXdtRitKN29LOVEvdkQ0aTcrTGZUNTR6d3NlMWlhSk1iMXBUSFpPQ3lsZE9YU0dQME0yV1M1VmdpejJCRGNFemY0dldBOG5sZzlFaWtDVnd0RkMwUThCUVYrTjJtWlVGUUgyampFS1JUTkUvSG16NTgxTWxLK200NXVEWXdKa09RZjVZM0FuMC9TUFN2WGx6ZXl5WjBDSFpIUHp1T2M4WE50ZmlFOHpzcTg2Q0NpUE9Nam9QQjdYeUY0OUwzMWhNQi9xbHFGM0dUT0F5ZGpoa1VIWEozMjAyNkxDQ2djTFNyT0o4ZitPRjRsTlJjSTl1ZFBrNU44emNTcXJFVGVGYzdiQ0ZtRlMxSVRXb25FcUJXKzVHaTJuMWIxWUlVZVBwYkpEbkJmMVR3OXhTMTg4RU81a0JyL1dyYVB1Z1VKelUzYjZFdUpwTW11Z01XU053WmdMM2IwVVR6SXVnQmJ2NnBSaGdlamZWYmEybmozMEVMSVJZN3c1aXB6bjdaN3ZvUXc3VlJLcXVqcmMwV2VrMVV2emRjMjVZdXZhaU0zeU9lUXJ0U3JFWS9ic3hOd1hkcjhKYkdkdStZZHZSSVdQSm5wUzlKcEtBWUNubkhZWnNRc3FTTnFRN2VYWlRXaDljYWt2ai9oOU83SVV1YVkwZmJmQ1NCSXlxSkdwaGdHWHpHbSs5aWZNb21TNnczMD0=",
+        operaciones: [
+            { nombre: "Iniciar", argumentos: [] },
+            { nombre: "EstablecerAlineacion", argumentos: [1] },
+            { nombre: "DescargarImagenDeInternetEImprimir", argumentos: ["https://i.postimg.cc/02PKCgMG/nyc-logo.png", 255, 0, false] },
+            { nombre: "Iniciar", argumentos: [] },
+            { nombre: "Feed", argumentos: [2] },
+            { nombre: "EstablecerTamañoFuente", argumentos: [3, 3] },
+            { nombre: "EstablecerEnfatizado", argumentos: [false] },
+            { nombre: "EstablecerAlineacion", argumentos: [1] },
+            { nombre: "EstablecerSubrayado", argumentos: [false] },
+            { nombre: "EstablecerImpresionAlReves", argumentos: [false] },
+            { nombre: "EstablecerImpresionBlancoYNegroInversa", argumentos: [false] },
+            { nombre: "EstablecerRotacionDe90Grados", argumentos: [false] },
+            { nombre: "EscribirTexto", argumentos: [data.tracking_number] },
+            { nombre: "Feed", argumentos: [1] },
+            { nombre: "Feed", argumentos: [1] },
+            { nombre: "EstablecerAlineacion", argumentos: [1] },
+            { nombre: "DescargarImagenDeInternetEImprimir", argumentos: [data.qr_code, 381, 0, false] },
+            { nombre: "Feed", argumentos: [1] },
+            { nombre: "EstablecerTamañoFuente", argumentos: [2, 2] },
+            { nombre: "EstablecerEnfatizado", argumentos: [false] },
+            { nombre: "EstablecerAlineacion", argumentos: [1] },
+            { nombre: "EstablecerSubrayado", argumentos: [true] },
+            { nombre: "EstablecerImpresionAlReves", argumentos: [false] },
+            { nombre: "EstablecerImpresionBlancoYNegroInversa", argumentos: [false] },
+            { nombre: "EstablecerRotacionDe90Grados", argumentos: [false] },
+            { nombre: "EscribirTexto", argumentos: ["REMITENTE:"] },
+            { nombre: "Feed", argumentos: [1] },
+            { nombre: "Feed", argumentos: [1] },
+            { nombre: "EstablecerTamañoFuente", argumentos: [2, 2] },
+            { nombre: "EstablecerEnfatizado", argumentos: [false] },
+            { nombre: "EstablecerAlineacion", argumentos: [1] },
+            { nombre: "EstablecerSubrayado", argumentos: [false] },
+            { nombre: "EstablecerImpresionAlReves", argumentos: [false] },
+            { nombre: "EstablecerImpresionBlancoYNegroInversa", argumentos: [false] },
+            { nombre: "EstablecerRotacionDe90Grados", argumentos: [false] },
+            { nombre: "EscribirTexto", argumentos: [data.sender] },
+            { nombre: "Feed", argumentos: [1] },
+            { nombre: "Feed", argumentos: [1] },
+            { nombre: "EstablecerTamañoFuente", argumentos: [2, 2] },
+            { nombre: "EstablecerEnfatizado", argumentos: [false] },
+            { nombre: "EstablecerAlineacion", argumentos: [1] },
+            { nombre: "EstablecerSubrayado", argumentos: [true] },
+            { nombre: "EstablecerImpresionAlReves", argumentos: [false] },
+            { nombre: "EstablecerImpresionBlancoYNegroInversa", argumentos: [false] },
+            { nombre: "EstablecerRotacionDe90Grados", argumentos: [false] },
+            { nombre: "EscribirTexto", argumentos: ["DESTINATARIO:"] },
+            { nombre: "Feed", argumentos: [1] },
+            { nombre: "Feed", argumentos: [1] },
+            { nombre: "EstablecerTamañoFuente", argumentos: [2, 2] },
+            { nombre: "EstablecerEnfatizado", argumentos: [false] },
+            { nombre: "EstablecerAlineacion", argumentos: [1] },
+            { nombre: "EstablecerSubrayado", argumentos: [false] },
+            { nombre: "EstablecerImpresionAlReves", argumentos: [false] },
+            { nombre: "EstablecerImpresionBlancoYNegroInversa", argumentos: [false] },
+            { nombre: "EstablecerRotacionDe90Grados", argumentos: [false] },
+            { nombre: "EscribirTexto", argumentos: [data.recipient] },
+            { nombre: "Feed", argumentos: [1] }
+        ]
+    };
+
+    try {
+        const response = await fetch("http://localhost:2811/imprimir", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+
+        console.log(result);
+
+        if (result.ok === true) {
+            return true;
+        } else {
+            showNotification('error', 'Error al imprimir el ticket, compruebe la impresora y reimprima manualmente');
+            return false;
+        }
+    } catch (error) {
+        showNotification('error', 'El servicio de impresión no esta disponible, reimprima manualmente');
+    }
+}
+
+// ============= Event Listeners =============
+// Inicialización
+document.addEventListener('DOMContentLoaded', function () {
+    initializeTable();
+});
+
+// Modal y formulario
 showShipment.addEventListener('click', async () => {
     try {
         const response = await fetch('/api/v1/packages_categories/');
@@ -170,21 +303,24 @@ shipmentButton.addEventListener('click', async () => {
         const response = await fetch('/api/v1/create_shipment/', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
             },
             body: JSON.stringify(formDataObject)
         });
-        const data = await response.json();
+        const result = await response.json();
 
         if (!response.ok) {
             showNotification('error', 'Error al crear el envio');
             return;
         }
 
+        printQR(result);
+
         if (table) {
             table.ajax.reload();
         }
-        
+
         showNotification('success', 'Envio creado correctamente');
         shipmentModal.hide();
     } catch (error) {
@@ -192,26 +328,26 @@ shipmentButton.addEventListener('click', async () => {
     }
 });
 
-typeSelect.addEventListener('change', function() {
+typeSelect.addEventListener('change', function () {
     if (this.options[this.selectedIndex].text.toLowerCase() === 'turismo') {
         senderInput.disabled = true;
         senderInput.value = '';
         senderContainer.classList.add('d-none');
-        
+
         envelopeInput.disabled = true;
         envelopeInput.value = '';
         envelopeContainer.classList.add('d-none');
-        
+
         packageCheckbox.disabled = true;
         packageCheckbox.checked = false;
         packageContainer.classList.add('d-none');
     } else {
         senderInput.disabled = false;
         senderContainer.classList.remove('d-none');
-        
+
         envelopeInput.disabled = false;
         envelopeContainer.classList.remove('d-none');
-        
+
         packageCheckbox.disabled = false;
         packageContainer.classList.remove('d-none');
     }
@@ -219,17 +355,61 @@ typeSelect.addEventListener('change', function() {
 
 shipmentModal._element.addEventListener('hidden.bs.modal', function () {
     shipmentForm.reset();
-    
+
     senderInput.disabled = false;
     senderContainer.classList.remove('d-none');
-    
+
     envelopeInput.disabled = false;
     envelopeContainer.classList.remove('d-none');
-    
+
     packageCheckbox.disabled = false;
     packageCheckbox.checked = false;
     packageContainer.classList.remove('d-none');
-    
+
     typeSelect.innerHTML = '';
     priceSelect.innerHTML = '';
+});
+
+function qrScanSuccess(decodedText, decodedResult) {
+    console.log(`Code matched = ${decodedText}`, decodedResult);
+}
+
+function qrScanFailure(error) {
+    console.warn(`Code scan error = ${error}`);
+}
+
+scanQr.addEventListener('click', () => {
+    html5QrcodeScanner.render(qrScanSuccess, qrScanFailure);
+    qrModal.show();
+});
+
+qrModal._element.addEventListener('hidden.bs.modal', () => {
+    html5QrcodeScanner.clear().then(() => {
+        console.log('QR scanner cleared');
+    });
+});
+
+showConfig.addEventListener('click', async () => {
+    try {
+        const response = await fetch("http://localhost:2811/impresoras");
+        const printerList = await response.json();
+        
+        console.log(printerList);
+
+        printerSelect.innerHTML = '';
+
+        printerList.forEach(printer => {
+            printerSelect.innerHTML += `<option value="${printer}">${printer}</option>`;
+        });
+    } catch (e) {
+        console.log(e);
+    }
+
+    configModal.show();
+});
+
+printerButton.addEventListener('click', () => {
+    const selectedPrinter = printerSelect.value;
+    document.cookie = `selectedPrinter=${selectedPrinter};path=/;max-age=31536000`;
+    configModal.hide();
 });

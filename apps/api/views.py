@@ -4,7 +4,7 @@ import uuid
 import os
 
 from .models import Shipments, Parameters, PackagePrices, PackageTypes
-from .serializers import ShipmentSerializer, ShipmentSearchSerializer, ShipmentCreateSerializer, PackagePricesSerializer, PackageTypesSerializer
+from .serializers import ShipmentSerializer, ShipmentSearchSerializer, ShipmentCreateSerializer, PackagePricesSerializer, PackageTypesSerializer, ParametersSerializer
 
 from rest_framework.views import APIView
 from rest_framework.response import Response

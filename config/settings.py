@@ -20,8 +20,6 @@ DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=Csv())
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -32,7 +30,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'corsheaders',
     'drf_yasg',
     'apps.api.apps.ApiConfig',
     'apps.web.apps.WebConfig',
