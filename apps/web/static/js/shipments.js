@@ -1,3 +1,8 @@
+// ============= Variables Globales =============
+let scanner;
+let table;
+let notificationQueue = Promise.resolve();
+
 // ============= Elementos del DOM =============
 // Botones principales
 const showConfig = document.getElementById('showConfig');
@@ -27,18 +32,14 @@ const shipmentButton = document.getElementById('shipmentButton');
 
 // Elementos del modal qr
 const qrModal = new bootstrap.Modal(document.getElementById('qrModal'));
+const qrSpinner = document.getElementById('qrSpinner');
 
 // Elementos del modal config
 const configModal = new bootstrap.Modal(document.getElementById('configModal'));
 const printerSelect = document.getElementById('printerSelect');
 const printerButton = document.getElementById('printerButton');
 
-// Variables globales
-let table;
-let notificationQueue = Promise.resolve();
-let html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: {width: 250, height: 250} });
-
-// ============= Utilidades =============
+// ============= Funciones Utilitarias =============
 function getCookie(cookieName) {
     const name = cookieName + '=';
     const decodedCookie = decodeURIComponent(document.cookie);
@@ -74,8 +75,32 @@ function showNotification(type, title, message, time = 3000) {
     });
     return notificationQueue;
 }
+ 
+ 
+async function completeShipment(tracking_number) {
+    try {
+        const response = await fetch(`/api/v1/complete_shipment/${tracking_number}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        });
+        const data = await response.json();
 
-// ============= Funciones de la Tabla =============
+        if (!response.ok) {
+            showNotification('error', data.message);
+            return;
+        }
+
+        showNotification('success', data.message);
+        table.ajax.reload();
+    } catch (error) {
+        showNotification('error', 'Error al completar la entrega del envío');
+    }
+}
+
+// ============= Funciones de Tabla =============
 function initializeTable() {
     if (table) {
         table.destroy();
@@ -152,8 +177,8 @@ function showDetails(data) {
                 </div>
             </div>
             <div class="d-flex flex-wrap justify-content-center align-items-center gap-2">
-                <button class="btn btn-warning fw-medium">Reimprimir ticket</button>
-                ${data.status.id > 3 ? `<button class="btn btn-success fw-medium">Confirmar entrega</button>` : ''}
+                ${data.status.id === 1 ? `<button class="btn btn-warning fw-medium">Reimprimir ticket</button>` : ''}
+                ${data.status.id === 3 ? `<button class="btn btn-success fw-medium" onclick="completeShipment('${data.tracking_number}')">Confirmar entrega</button>` : ''}
             </div>
         </div>
         `
@@ -162,15 +187,13 @@ function showDetails(data) {
 
 // ============= Funciones de Impresión =============
 async function printQR(data) {
-    console.log(data);
-
     const payload = {
         nombreImpresora: getCookie('selectedPrinter'),
         serial: "YTAwODkxYjhfXzIwMjUtMDUtMTVfXzIwMjUtMDYtMTQjIyNZWkJRNTVZdko3bGJncWVJRXpUNCtxa0VTc1Y0Y1lhbXdhZVJscUI2OVNqME5tOVBNaVppcFdHRjVVVVNKTmQ2OXVoMTZzbHIxY05GMzBDRFVTUnRabC9BRUxqMTdOclNhSngxVjI1bzh2akE3bWRrc3FKdlhTRXB6blZ1NW1xVmN2WWJGZDRFSU1ZSXc1djQ0MU9OU3ROYURtbnMxQXdtRitKN29LOVEvdkQ0aTcrTGZUNTR6d3NlMWlhSk1iMXBUSFpPQ3lsZE9YU0dQME0yV1M1VmdpejJCRGNFemY0dldBOG5sZzlFaWtDVnd0RkMwUThCUVYrTjJtWlVGUUgyampFS1JUTkUvSG16NTgxTWxLK200NXVEWXdKa09RZjVZM0FuMC9TUFN2WGx6ZXl5WjBDSFpIUHp1T2M4WE50ZmlFOHpzcTg2Q0NpUE9Nam9QQjdYeUY0OUwzMWhNQi9xbHFGM0dUT0F5ZGpoa1VIWEozMjAyNkxDQ2djTFNyT0o4ZitPRjRsTlJjSTl1ZFBrNU44emNTcXJFVGVGYzdiQ0ZtRlMxSVRXb25FcUJXKzVHaTJuMWIxWUlVZVBwYkpEbkJmMVR3OXhTMTg4RU81a0JyL1dyYVB1Z1VKelUzYjZFdUpwTW11Z01XU053WmdMM2IwVVR6SXVnQmJ2NnBSaGdlamZWYmEybmozMEVMSVJZN3c1aXB6bjdaN3ZvUXc3VlJLcXVqcmMwV2VrMVV2emRjMjVZdXZhaU0zeU9lUXJ0U3JFWS9ic3hOd1hkcjhKYkdkdStZZHZSSVdQSm5wUzlKcEtBWUNubkhZWnNRc3FTTnFRN2VYWlRXaDljYWt2ai9oOU83SVV1YVkwZmJmQ1NCSXlxSkdwaGdHWHpHbSs5aWZNb21TNnczMD0=",
         operaciones: [
             { nombre: "Iniciar", argumentos: [] },
             { nombre: "EstablecerAlineacion", argumentos: [1] },
-            { nombre: "DescargarImagenDeInternetEImprimir", argumentos: ["https://i.postimg.cc/02PKCgMG/nyc-logo.png", 255, 0, false] },
+            { nombre: "DescargarImagenDeInternetEImprimir", argumentos: ["https://i.postimg.cc/02PKCgMG/nyc-logo.png", 283, 0, false] },
             { nombre: "Iniciar", argumentos: [] },
             { nombre: "Feed", argumentos: [2] },
             { nombre: "EstablecerTamañoFuente", argumentos: [3, 3] },
@@ -183,8 +206,10 @@ async function printQR(data) {
             { nombre: "EscribirTexto", argumentos: [data.tracking_number] },
             { nombre: "Feed", argumentos: [1] },
             { nombre: "Feed", argumentos: [1] },
+            { nombre: "Iniciar", argumentos: [] },
             { nombre: "EstablecerAlineacion", argumentos: [1] },
-            { nombre: "DescargarImagenDeInternetEImprimir", argumentos: [data.qr_code, 381, 0, false] },
+            { nombre: "ImprimirCodigoQr", argumentos: [data.tracking_number, 302, 1, 0] },
+            { nombre: "Iniciar", argumentos: [] },
             { nombre: "Feed", argumentos: [1] },
             { nombre: "EstablecerTamañoFuente", argumentos: [2, 2] },
             { nombre: "EstablecerEnfatizado", argumentos: [false] },
@@ -224,7 +249,9 @@ async function printQR(data) {
             { nombre: "EstablecerImpresionBlancoYNegroInversa", argumentos: [false] },
             { nombre: "EstablecerRotacionDe90Grados", argumentos: [false] },
             { nombre: "EscribirTexto", argumentos: [data.recipient] },
-            { nombre: "Feed", argumentos: [1] }
+            { nombre: "Feed", argumentos: [1] },
+            { nombre: "Feed", argumentos: [7] },
+            { nombre: "CorteParcial", argumentos: [] }
         ]
     };
 
@@ -238,8 +265,6 @@ async function printQR(data) {
         });
         const result = await response.json();
 
-        console.log(result);
-
         if (result.ok === true) {
             return true;
         } else {
@@ -251,13 +276,44 @@ async function printQR(data) {
     }
 }
 
+// ============= Funciones de Escaneo QR =============
+async function qrScanSuccess(decodedText) {
+    await scanner.clear();
+
+    qrSpinner.classList.remove('d-none');
+
+    try {
+        const response = await fetch(`/api/v1/update_status/${decodedText}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        });
+        const data = await response.json();
+        
+        if (response.ok) {
+            showNotification('success', data.message);
+            qrModal.hide();
+            table.ajax.reload();
+        } else {
+            showNotification('error', data.message);
+        }
+    } catch (error) {
+        showNotification('error', 'Error al actualizar el estado del envío');
+    } finally {
+        qrSpinner.classList.add('d-none');
+        qrModal.hide();
+    }
+}
+
 // ============= Event Listeners =============
 // Inicialización
 document.addEventListener('DOMContentLoaded', function () {
     initializeTable();
 });
 
-// Modal y formulario
+// Event Listeners - Modal de Envíos
 showShipment.addEventListener('click', async () => {
     try {
         const response = await fetch('/api/v1/packages_categories/');
@@ -308,21 +364,21 @@ shipmentButton.addEventListener('click', async () => {
             },
             body: JSON.stringify(formDataObject)
         });
-        const result = await response.json();
+        const data = await response.json();
+
+        console.log(data);
 
         if (!response.ok) {
-            showNotification('error', 'Error al crear el envio');
+            showNotification('error', data.message);
             return;
         }
 
-        printQR(result);
+        printQR(data.shipment);
 
-        if (table) {
-            table.ajax.reload();
-        }
-
-        showNotification('success', 'Envio creado correctamente');
+        showNotification('success', data.message);
         shipmentModal.hide();
+
+        table.ajax.reload();
     } catch (error) {
         showNotification('error', 'Error al contactar con el servidor');
     }
@@ -370,31 +426,30 @@ shipmentModal._element.addEventListener('hidden.bs.modal', function () {
     priceSelect.innerHTML = '';
 });
 
-function qrScanSuccess(decodedText, decodedResult) {
-    console.log(`Code matched = ${decodedText}`, decodedResult);
-}
-
-function qrScanFailure(error) {
-    console.warn(`Code scan error = ${error}`);
-}
-
+// Event Listeners - Modal QR
 scanQr.addEventListener('click', () => {
-    html5QrcodeScanner.render(qrScanSuccess, qrScanFailure);
+    scanner = new Html5QrcodeScanner("qr-reader", {
+        fps: 10,
+        qrbox: 250,
+        showTorchButtonIfSupported: true,
+        qrScanSuccess
+    });
+
+    scanner.render(qrScanSuccess);
     qrModal.show();
 });
 
-qrModal._element.addEventListener('hidden.bs.modal', () => {
-    html5QrcodeScanner.clear().then(() => {
-        console.log('QR scanner cleared');
-    });
+qrModal._element.addEventListener('hide.bs.modal', async function () {
+    if (scanner) {
+        scanner.clear();
+    }    
 });
 
+// Event Listeners - Modal Configuración
 showConfig.addEventListener('click', async () => {
     try {
         const response = await fetch("http://localhost:2811/impresoras");
         const printerList = await response.json();
-        
-        console.log(printerList);
 
         printerSelect.innerHTML = '';
 

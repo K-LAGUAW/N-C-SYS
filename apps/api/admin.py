@@ -23,4 +23,11 @@ class ParametersAdmin(admin.ModelAdmin):
 
 @admin.register(Shipments)
 class ShipmentsAdmin(admin.ModelAdmin):
-    readonly_fields = ('qr_code', 'total_amount', 'tracking_number', 'creation_date', 'update_date', 'payment_type', 'status')
+    readonly_fields = ('total_amount', 'tracking_number', 'creation_date', 'update_date', 'payment_type', 'status')
+    list_filter = ('status',)
+
+    actions = ['mark_as_in_transit']
+
+    def mark_as_in_transit(self, request, queryset):
+        queryset.update(status=StatesList.objects.get(pk=2))
+    mark_as_in_transit.short_description = "Marcar como en tránsito"

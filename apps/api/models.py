@@ -60,7 +60,6 @@ class StatesList(models.Model):
 class Shipments(models.Model):
     package_type = models.ForeignKey('PackageTypes', on_delete=models.CASCADE, verbose_name="Tipo de paquete")
     tracking_number = models.CharField(max_length=11, primary_key=True, editable=False, verbose_name="Número de seguimiento")
-    qr_code = models.ImageField(upload_to='qrcodes/', verbose_name="Codigo QR")
     creation_date = models.DateTimeField(auto_now_add=True, editable=False, verbose_name="Fecha de creacion")
     update_date = models.DateTimeField(auto_now=True, verbose_name="Fecha de actualizacion")
     status = models.ForeignKey(StatesList, on_delete=models.CASCADE, default=1, verbose_name="Estado")
