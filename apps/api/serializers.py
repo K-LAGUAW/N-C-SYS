@@ -24,7 +24,7 @@ class ShipmentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Shipments
         fields = '__all__'
-        read_only_fields = ['tracking_number', 'status', 'total_amount', 'qr_code', 'payment_type']
+        read_only_fields = ('tracking_number', 'status', 'total_amount', 'payment_type')
 
 class ShipmentSearchSerializer(serializers.ModelSerializer):
     creation_date = serializers.DateTimeField(format="%d-%m-%Y %H:%M")

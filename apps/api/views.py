@@ -2,7 +2,7 @@ import requests
 import uuid
 
 from .models import Shipments, Parameters, PackagePrices, PackageTypes
-from .serializers import ShipmentSerializer, ShipmentSearchSerializer, ShipmentCreateSerializer, PackagePricesSerializer, PackageTypesSerializer, ParametersSerializer
+from .serializers import ShipmentSerializer, ShipmentSearchSerializer, ShipmentCreateSerializer, PackagePricesSerializer, PackageTypesSerializer
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,14 +11,8 @@ from rest_framework.generics import ListAPIView
 from django.shortcuts import get_object_or_404
 from django.http import Http404
 
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-import uuid
-import requests
-
 class ShipmentsView(ListAPIView):
-    queryset = Shipments.objects.all().order_by('-creation_date')
+    queryset = Shipments.objects.filter(status__in=[1, 2, 3]).order_by('-creation_date')
     serializer_class = ShipmentSerializer
 
 class CreateShipmentView(APIView):
@@ -142,7 +136,7 @@ class CompleteShipmentView(APIView):
             if current_status == 3:
                 shipment.status_id = 4
                 shipment.save()
-                result = f'Se completo la entrega del paquete {tracking_number}'
+                result = f'Se completo la entrega del paquete: {tracking_number}'
             else:
                 result = f'El paquete {tracking_number} no se encuentra listo para ser entregado'
                 status_code = 400
@@ -152,6 +146,6 @@ class CompleteShipmentView(APIView):
                 status=status_code) 
         except Http404:
             return Response({
-               'message': f'No se encontro ningun paquete con el numero de tracking {tracking_number}'},
+               'message': f'No se encontro ningun paquete con el numero de tracking: {tracking_number}'},
                 status=404
             )

@@ -95,7 +95,7 @@ async function completeShipment(tracking_number) {
         showNotification('success', data.message);
         table.ajax.reload();
     } catch (error) {
-        showNotification('error', 'Error al completar la entrega del envi­o');
+        showNotification('error', 'Error al completar la entrega del envío');
     }
 }
 
@@ -185,7 +185,7 @@ function showDetails(data) {
     );
 }
 
-// ============= Funciones de ImpresiÃ³n =============
+// ============= Funciones de Impresión =============
 async function printQR(tracking_number, sender, recipient) {
     const payload = {
         nombreImpresora: getCookie('selectedPrinter'),
@@ -272,7 +272,7 @@ async function printQR(tracking_number, sender, recipient) {
             return false;
         }
     } catch (error) {
-        showNotification('error', 'El servicio de impresiÃ³n no esta disponible, reimprima manualmente');
+        showNotification('error', 'El servicio de impresión no esta disponible, reimprima manualmente');
     }
 }
 
@@ -300,7 +300,7 @@ async function qrScanSuccess(decodedText) {
             showNotification('error', data.message);
         }
     } catch (error) {
-        showNotification('error', 'Error al actualizar el estado del envÃ­o');
+        showNotification('error', 'Error al actualizar el estado del envío');
     } finally {
         qrSpinner.classList.add('d-none');
         qrModal.hide();
@@ -308,7 +308,7 @@ async function qrScanSuccess(decodedText) {
 }
 
 // ============= Event Listeners =============
-// InicializaciÃ³n
+// Inicialización
 document.addEventListener('DOMContentLoaded', function () {
     initializeTable();
     let inactivityTimer;
@@ -327,7 +327,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('keypress', resetTimer);
 });
 
-// Event Listeners - Modal de EnvÃ­os
+// Event Listeners - Modal de Envíos
 showShipment.addEventListener('click', async () => {
     try {
         const response = await fetch('/api/v1/packages_categories/');
@@ -459,7 +459,7 @@ qrModal._element.addEventListener('hide.bs.modal', async function () {
     }
 });
 
-// Event Listeners - Modal ConfiguraciÃ³n
+// Event Listeners - Modal Configuración
 showConfig.addEventListener('click', async () => {
     try {
         const response = await fetch("http://localhost:2811/impresoras");
